@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { BulkUpdateStockDto } from './dto/bulk-update-stock.dto';
+import { Product } from '../entities/product.entity';
+import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('product')
+@UseGuards(AuthGuard)
 export class ProductController {
-    constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) {}
 
-    @Get()
-    async findAll(): Promise<any> {
-        return this.productService.findAll();
+  @Post()
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @CurrentUser() user: any,
+  ): Promise<Product> {
+    if (user.userId) {
+      createProductDto.storeId = user.userId;
     }
+    return this.productService.create(createProductDto);
+  }
 
-    @Post()
-    async create(@Body() product: any): Promise<any> {
-        return this.productService.create(product);
-    }
+  @Get()
+  findAll(@CurrentUser() user: any): Promise<Product[]> {
+    return this.productService.findAll(user.userId);
+  }
 
-    @Get(':id')
-    async findOne(@Param('id') id: string): Promise<any> {
-        return this.productService.findOne(id);
-    }
+  @Patch('bulk-update-stock')
+  bulkUpdateStock(@Body() bulkUpdateStockDto: BulkUpdateStockDto): Promise<void> {
+    return this.productService.bulkUpdateStock(bulkUpdateStockDto);
+  }
 
-    @Put(':id')
-    async update(@Param('id') id: string, @Body() product: any): Promise<any> {
-        return this.productService.update(id, product);
-    }
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Product> {
+    return this.productService.findOne(id);
+  }
 
-    @Delete(':id')
-    async delete(@Param('id') id: string): Promise<any> {
-        return this.productService.delete(id);
-    }
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
+    return this.productService.update(id, updateProductDto);
+  }
 
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.productService.remove(id);
+  }
 }
-

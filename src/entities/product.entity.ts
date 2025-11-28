@@ -4,13 +4,15 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  Index,
 } from 'typeorm';
 
 @Entity('products')
 export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ name: 'store_id' })
+  storeId: number;
 
   @Column()
   name: string;
@@ -18,16 +20,15 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  sale_price: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'price' })
+  price: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  cost_price: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'cost_price', nullable: true })
+  costPrice: number;
 
-  @Column({ type: 'int', default: 0 })
-  quantity_in_stock: number;
+  @Column({ type: 'int', default: 0, name: 'stock_quantity' })
+  stockQuantity: number;
 
-  @Index({ unique: true, where: '("sku" IS NOT NULL)' })
   @Column({ unique: true, nullable: true })
   sku: string;
 
@@ -37,9 +38,12 @@ export class Product {
   @Column({ nullable: true })
   supplier: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @Column({ type: 'tinyint', width: 1, default: 1 }) 
+  active: boolean;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }
