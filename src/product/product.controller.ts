@@ -17,6 +17,7 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @CurrentUser() user: any,
   ): Promise<Product> {
+    console.log('Current User:', user);
     if (user.userId) {
       createProductDto.storeId = user.userId;
     }
@@ -25,6 +26,7 @@ export class ProductController {
 
   @Get()
   findAll(@CurrentUser() user: any): Promise<Product[]> {
+    console.log('Current User:', user);
     return this.productService.findAll(user.userId);
   }
 

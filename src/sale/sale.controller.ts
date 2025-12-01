@@ -16,14 +16,18 @@ export class SaleController {
     @Body() createSaleDto: CreateSaleDto,
     @CurrentUser() user: any,
   ): Promise<Sale> {
-    createSaleDto.storeId = user.storeId;
-    createSaleDto.workerId = user.id;
+    if (user.userId) {
+      createSaleDto.storeId = user.userId;
+    }
+    if (user.id) {
+      createSaleDto.workerId = user.id;
+    }
     return this.saleService.create(createSaleDto);
   }
 
   @Get()
   findAll(@CurrentUser() user: any): Promise<Sale[]> {
-    return this.saleService.findAll(user.storeId);
+    return this.saleService.findAll(user.userId);
   }
 
   @Get(':id')
